@@ -7,10 +7,22 @@ const mkdirpSync = require("mkdirp");
 const csv = require("csv");
 
 let messages = [];
+let outputPath = "./i18n";
+let baseFileName = "en.data";
 
 module.exports = function(babel) {
     var t = babel.types;
     return {
+        pre() {
+            outputPath = this.opts.outputPath
+                ? this.opts.outputPath
+                : outputPath;
+            baseFileName = this.opts.baseFileName
+                ? this.opts.baseFileName
+                : baseFileName;
+
+            console.log(outputPath, baseFileName);
+        },
         visitor: {
             CallExpression(path, state) {
                 //console.log(path.node.callee);
@@ -37,20 +49,24 @@ module.exports = function(babel) {
             }
         },
         post(file, state) {
-            generateCsv(messages);
-
-            const messageJson = messages.reduce((messageJson, message) => {
-                return Object.assign(messageJson, {
-                    [message.id]: message.defaultMessage
-                });
-            }, {});
-
-            writeFileSync("output.json", JSON.stringify(messageJson));
+            const filePathWithoutExtension = `${outputPath}/${baseFileName}`;
+            generateCsv(messages, `${filePathWithoutExtension}.csv`);
+            generateJson(messages, `${filePathWithoutExtension}.json`);
         }
     };
 };
 
-generateCsv = messageArray => {
+generateJson = (messageArray, filePath) => {
+    const messageJson = messageArray.reduce((messageJson, message) => {
+        return Object.assign(messageJson, {
+            [message.id]: message.defaultMessage
+        });
+    }, {});
+
+    writeFileSync(filePath, JSON.stringify(messageJson));
+};
+
+generateCsv = (messageArray, filePath) => {
     const columns = {
         id: "English",
         defaultMessage: "Translation",
@@ -60,7 +76,7 @@ generateCsv = messageArray => {
         err,
         messageArray
     ) {
-        writeFileSync("output.csv", messageArray);
+        writeFileSync(filePath, messageArray);
     });
 };
 
