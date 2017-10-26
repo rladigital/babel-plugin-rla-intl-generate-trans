@@ -6,14 +6,11 @@ const writeFileSync = require("fs").writeFileSync;
 const mkdirpSync = require("mkdirp");
 const csv = require("csv");
 
+let messages = [];
+
 module.exports = function(babel) {
     var t = babel.types;
     return {
-        pre(file) {
-            this.messages = [];
-            //console.log(file);
-        },
-
         visitor: {
             CallExpression(path, state) {
                 //console.log(path.node.callee);
@@ -28,18 +25,21 @@ module.exports = function(babel) {
                             "First argument to trans function must be a string"
                         );
                     }
-                    this.messages.push({
-                        id: text,
-                        defaultMessage: text,
-                        description: description
-                    });
+                    //Check if the message is already there, and add if needed
+                    if (messageNeedsToBeAdded(text, messages)) {
+                        messages.push({
+                            id: text,
+                            defaultMessage: text,
+                            description: description
+                        });
+                    }
                 }
             }
         },
         post(file, state) {
-            generateCsv(this.messages);
+            generateCsv(messages);
 
-            const messageJson = this.messages.reduce((messageJson, message) => {
+            const messageJson = messages.reduce((messageJson, message) => {
                 return Object.assign(messageJson, {
                     [message.id]: message.defaultMessage
                 });
@@ -50,16 +50,26 @@ module.exports = function(babel) {
     };
 };
 
-generateCsv = messages => {
+generateCsv = messageArray => {
     const columns = {
         id: "English",
         defaultMessage: "Translation",
         description: "Description"
     };
-    csv.stringify(messages, { header: true, columns: columns }, function(
+    csv.stringify(messageArray, { header: true, columns: columns }, function(
         err,
-        messages
+        messageArray
     ) {
-        writeFileSync("output.csv", messages);
+        writeFileSync("output.csv", messageArray);
     });
+};
+
+messageNeedsToBeAdded = (key, messages) => {
+    for (let i = 0; i < messages.length; i++) {
+        if (messages[i].id === key) {
+            return false;
+        }
+    }
+
+    return true;
 };
