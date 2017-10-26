@@ -1,0 +1,28 @@
+{
+    "name": "babel-plugin-rla-intl-generate-trans",
+    "version": "0.0.1",
+    "description": "",
+    "main": "src/generateTranslationFiles.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rladigital/rla-intl.git"
+    },
+    "keywords": ["rla", "intl", "i18n", "react-intl", "trans", "translation"],
+    "author": "tom.lawton@rla.co.uk",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/rladigital/rla-intl/issues"
+    },
+    "homepage": "https://github.com/rladigital/rla-intl#readme",
+
+    "devDependencies": {
+        "babel-core": "^6.26.0"
+    },
+    "dependencies": {
+        "csv": "^2.0.0",
+        "mkdirp": "^0.5.1"
+    }
+}
